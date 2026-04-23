@@ -1,0 +1,228 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 12px;
+  width: 380px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.modal-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.875rem;
+}
+
+.modal-label {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.modal-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.modal-badge.admin {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.modal-badge.mantenimiento {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  border-color: #a78bfa;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-cancel {
+  padding: 7px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.btn-save {
+  padding: 7px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-save:hover {
+  background: #6d28d9;
+}
+
+.tabla-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+}
+
+.usuarios-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.usuarios-tabla thead tr {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.usuarios-tabla th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.usuarios-tabla td {
+  padding: 13px 16px;
+  color: #333;
+  border-bottom: 1px solid #f9f9f9;
+}
+
+.usuarios-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.usuarios-tabla tbody tr:hover {
+  background: #fafafa;
+}
+
+.rol-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.rol-badge.admin {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.rol-badge.mantenimiento {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.acciones {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-accion {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-accion.ver {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.btn-accion.editar {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.btn-accion.eliminar {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-accion:hover {
+  opacity: 0.8;
+}

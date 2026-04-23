@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-root d-flex">
-      <Sidebar />
+      <Sidebar filter={filter} onFilterChange={setFilter} /> {/* 👈 */}
       <div className="dashboard-main d-flex flex-column">
         <TopBar />
         <div className="dashboard-content flex-grow-1">

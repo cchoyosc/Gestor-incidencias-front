@@ -1,32 +1,57 @@
-import React, { useState } from 'react';
-import './Sidebar.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Sidebar.css";
+import { type FilterOption } from "./FilterDropdown";
+
+interface SidebarProps {
+  filter?: FilterOption;
+  onFilterChange?: (val: FilterOption) => void;
+}
 
 interface NavItemProps {
   label: string;
   icon?: string;
   children?: string[];
   active?: boolean;
+  selectedChild?: string;
+  onChildSelect?: (val: string) => void;
+  onClick?: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ label, icon, children, active }) => {
+const NavItem: React.FC<NavItemProps> = ({
+  label,
+  icon,
+  children,
+  active,
+  selectedChild,
+  onChildSelect,
+  onClick,
+}) => {
   const [open, setOpen] = useState(active || false);
 
   return (
     <div className="nav-item-wrapper">
       <div
-        className={`nav-item ${active ? 'active' : ''}`}
-        onClick={() => children && setOpen(!open)}
+        className={`nav-item ${active ? "active" : ""}`}
+        onClick={() => {
+          if (children) setOpen(!open);
+          onClick?.();
+        }}
       >
         {icon && <span className="nav-icon">{icon}</span>}
         <span>{label}</span>
         {children && (
-          <span className="nav-arrow ms-auto">{open ? '▾' : '▸'}</span>
+          <span className="nav-arrow ms-auto">{open ? "▾" : "▸"}</span>
         )}
       </div>
       {children && open && (
         <div className="nav-subitems">
           {children.map((child) => (
-            <div key={child} className={`nav-subitem ${child === 'Activas' ? 'subitem-active' : ''}`}>
+            <div
+              key={child}
+              className={`nav-subitem ${child === selectedChild ? "subitem-active" : ""}`}
+              onClick={() => onChildSelect?.(child)}
+            >
               {child}
             </div>
           ))}
@@ -36,7 +61,9 @@ const NavItem: React.FC<NavItemProps> = ({ label, icon, children, active }) => {
   );
 };
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<SidebarProps> = ({ filter, onFilterChange }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="sidebar d-flex flex-column">
       {/* Logo */}
@@ -51,7 +78,11 @@ const Sidebar: React.FC = () => {
         </div>
         <div className="logo-text">
           <span className="logo-main">compensar</span>
-          <div className="logo-sub">fundación<br />universitaria</div>
+          <div className="logo-sub">
+            fundación
+            <br />
+            universitaria
+          </div>
         </div>
       </div>
 
@@ -72,14 +103,25 @@ const Sidebar: React.FC = () => {
       {/* Nav */}
       <nav className="sidebar-nav px-2 flex-grow-1">
         <div className="nav-section-label px-2 mb-1">Dashboards</div>
-        <NavItem label="Home" icon="🏠" />
+        <NavItem
+          label="Home"
+          icon="🏠"
+          onClick={() => navigate("/dashboard")}
+        />
         <NavItem
           label="Incidencias"
           icon="⚑"
           active={true}
-          children={['Activas', 'Finalizadas', 'Pendientes']}
+          children={["Activas", "Finalizadas", "Pendientes"]}
+          selectedChild={filter}
+          onChildSelect={(val) => onFilterChange?.(val as FilterOption)}
+          onClick={() => navigate("/dashboard")}
         />
-        <NavItem label="Usuários" icon="👥" />
+        <NavItem
+          label="Usuários"
+          icon="👥"
+          onClick={() => navigate("/usuarios")}
+        />
       </nav>
 
       {/* Footer */}

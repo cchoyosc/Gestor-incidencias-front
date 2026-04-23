@@ -1,16 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './FilterDropdown.css';
+import React, { useState, useRef, useEffect } from "react";
+import "./FilterDropdown.css";
 
-export type FilterOption = 'Activas' | 'Finalizadas' | 'Pendientes';
+export type FilterOption = "Activas" | "Finalizadas" | "Pendientes";
 
 interface FilterDropdownProps {
   selected: FilterOption;
   onChange: (option: FilterOption) => void;
 }
 
-const options: FilterOption[] = ['Activas', 'Finalizadas', 'Pendientes'];
+const options: FilterOption[] = ["Activas", "Finalizadas", "Pendientes"];
 
-const FilterDropdown: React.FC<FilterDropdownProps> = ({ selected, onChange }) => {
+const FilterDropdown: React.FC<FilterDropdownProps> = ({
+  selected,
+  onChange,
+}) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -20,8 +23,8 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ selected, onChange }) =
         setOpen(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
@@ -34,8 +37,11 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ selected, onChange }) =
           {options.map((opt) => (
             <div
               key={opt}
-              className={`filter-option ${selected === opt ? 'selected' : ''}`}
-              onClick={() => { onChange(opt); setOpen(false); }}
+              className={`filter-option ${selected === opt ? "selected" : ""}`}
+              onClick={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
             >
               <span className="filter-bullet">•</span> {opt}
             </div>
