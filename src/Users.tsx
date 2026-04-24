@@ -4,6 +4,7 @@ import TopBar from "./components/TopBar";
 import UserDetailModal from "./components/UserDetailModal";
 import EditUserModal from "./components/EditUserModal";
 import "./Dashboard.css";
+import { useUsers } from "./hooks/useUsers";
 
 export type UserRole = "admin" | "mantenimiento";
 
@@ -14,59 +15,22 @@ export interface User {
   rol: UserRole;
 }
 
-const USERS: User[] = [
-  {
-    id: 1,
-    nombre: "Carlos Mendoza",
-    identificacion: "1023456789",
-    rol: "admin",
-  },
-  {
-    id: 2,
-    nombre: "Laura Gómez",
-    identificacion: "1045678901",
-    rol: "mantenimiento",
-  },
-  {
-    id: 3,
-    nombre: "Andrés Torres",
-    identificacion: "1067890123",
-    rol: "mantenimiento",
-  },
-  {
-    id: 4,
-    nombre: "María Rodríguez",
-    identificacion: "1089012345",
-    rol: "admin",
-  },
-  {
-    id: 5,
-    nombre: "Juan Pérez",
-    identificacion: "1001234567",
-    rol: "mantenimiento",
-  },
-  {
-    id: 6,
-    nombre: "Sofía Herrera",
-    identificacion: "1012345678",
-    rol: "admin",
-  },
-];
+const Users = () => {
+  const { users, loading, removeUser,editUser  } = useUsers();
+const [editUserData, setEditUserData,] = useState<User | null>(null);
+const [detailUser, setDetailUser] = useState<User | null>(null);
 
-const Users: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(USERS);
-  const [detailUser, setDetailUser] = useState<User | null>(null);
-  const [editUser, setEditUser] = useState<User | null>(null);
+  if (loading) return <p>Cargando...</p>;
 
   const handleDelete = (id: number) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    removeUser(id);
   };
 
+  //  guardar usando API
   const handleSave = (updated: User) => {
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
-    setEditUser(null);
+    editUser(updated);
+    setEditUserData(null);
   };
-
   return (
     <div className="dashboard-root d-flex">
       <Sidebar />
@@ -117,8 +81,8 @@ const Users: React.FC = () => {
                           Ver
                         </button>
                         <button
-                          className="btn-accion editar"
-                          onClick={() => setEditUser(user)}
+                         className="btn-accion editar"
+                          onClick={() => setEditUserData(user)}
                         >
                           Editar
                         </button>
@@ -137,17 +101,18 @@ const Users: React.FC = () => {
           </div>
         </div>
       </div>
-
+      {/* ✅ modal detalle */}
       {detailUser && (
         <UserDetailModal
           user={detailUser}
           onClose={() => setDetailUser(null)}
         />
       )}
-      {editUser && (
+        {/* ✅ modal edición */}
+      {editUserData && (
         <EditUserModal
-          user={editUser}
-          onClose={() => setEditUser(null)}
+          user={editUserData}
+          onClose={() => setEditUserData(null)}
           onSave={handleSave}
         />
       )}
