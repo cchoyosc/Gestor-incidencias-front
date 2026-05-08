@@ -1,7 +1,12 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CrearIncidencia.css";
-
+import { createIncidencia } from "./service/api";
+import {
+  getIncidencias,
+  ponerEnEspera,
+  resolverIncidencia,
+} from "./service/api";
 const CrearIncidencia: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,13 +34,24 @@ const CrearIncidencia: React.FC = () => {
     }
   };
 
-  const handleCrear = () => {
+  const handleCrear = async () => {
     if (!titulo || !descripcion) return;
-    setExito(true);
-    setTimeout(() => {
-      setExito(false);
-      navigate("/login");
-    }, 2000);
+    try {
+      const formData = new FormData();
+      formData.append("titulo", titulo);
+      formData.append("descripcion", descripcion);
+      if (imagen) formData.append("imagen", imagen);
+
+      await createIncidencia(formData);
+
+      setExito(true);
+      setTimeout(() => {
+        setExito(false);
+        navigate("/login");
+      }, 2000);
+    } catch {
+      alert("Error al crear la incidencia");
+    }
   };
 
   return (

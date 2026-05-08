@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
     "outDir": "dist",
     "skipLibCheck": true,
-    "jsx": "react-jsx", // usa "react" si React < 17
+    "jsx": "react-jsx",
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"]

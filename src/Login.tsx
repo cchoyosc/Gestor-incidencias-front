@@ -18,6 +18,7 @@ const Login: React.FC = () => {
       const { user } = await loginUser(email, password);
       localStorage.setItem("userName", user.nombre);
       localStorage.setItem("userRol", user.rol_id);
+      localStorage.setItem("userId", user.id);
 
       if (user.rol_id === "R1") {
         navigate("/dashboard");

@@ -1,69 +1,53 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import SidebarMantenimiento from "./components/SidebarMantenimiento";
 import type { EstadoIncidencia } from "./components/SidebarMantenimiento";
 import TopBar from "./components/TopBar";
 import "./IncidenciasMantenimiento.css";
+import {
+  getIncidencias,
+  ponerEnEspera,
+  resolverIncidencia,
+} from "./service/api";
 
 export interface Incidencia {
   id: string;
-  fecha: string;
+  titulo: string;
   descripcion: string;
-  imagen?: string;
+  estado: string;
+  foto?: any;
+  creado_en: string;
+  asignado_id?: string;
 }
-
-const DATA: Record<EstadoIncidencia, Incidencia[]> = {
-  Nuevas: [
-    {
-      id: "INC-001",
-      fecha: "2025-04-01",
-      descripcion: "Fallo en sistema de aire acondicionado piso 3",
-    },
-    {
-      id: "INC-002",
-      fecha: "2025-04-03",
-      descripcion: "Puerta de entrada principal no cierra correctamente",
-    },
-    {
-      id: "INC-003",
-      fecha: "2025-04-05",
-      descripcion: "Goteras en techo del salón 204",
-    },
-  ],
-  Cerradas: [
-    {
-      id: "INC-004",
-      fecha: "2025-03-20",
-      descripcion: "Cambio de bombillas en pasillo B",
-    },
-    {
-      id: "INC-005",
-      fecha: "2025-03-22",
-      descripcion: "Reparación de silla en sala de juntas",
-    },
-  ],
-  Pendientes: [
-    {
-      id: "INC-006",
-      fecha: "2025-04-10",
-      descripcion: "Revisión de cableado eléctrico laboratorio 1",
-    },
-  ],
+const estadoMap: Record<EstadoIncidencia, string> = {
+  Nuevas: "pendiente",
+  Cerradas: "resuelto",
+  Pendientes: "en_proceso",
 };
 
 const IncidenciasMantenimiento: React.FC = () => {
-  const navigate = useNavigate();
   const [filtro, setFiltro] = useState<EstadoIncidencia>("Nuevas");
+  const [incidencias, setIncidencias] = useState<Incidencia[]>([]);
+  const [loading, setLoading] = useState(true);
   const [seleccionadas, setSeleccionadas] = useState<string[]>([]);
   const [detalle, setDetalle] = useState<Incidencia | null>(null);
 
-  const incidencias = DATA[filtro];
+  useEffect(() => {
+    getIncidencias()
+      .then((data) => {
+        console.log("📦 Incidencias:", data); // 👈
+        setIncidencias(data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtradas = incidencias.filter((i) => i.estado === estadoMap[filtro]);
 
   const toggleTodas = () => {
-    if (seleccionadas.length === incidencias.length) {
+    if (seleccionadas.length === filtradas.length) {
       setSeleccionadas([]);
     } else {
-      setSeleccionadas(incidencias.map((i) => i.id));
+      setSeleccionadas(filtradas.map((i) => i.id));
     }
   };
 
@@ -74,7 +58,18 @@ const IncidenciasMantenimiento: React.FC = () => {
   };
 
   const todasSeleccionadas =
-    incidencias.length > 0 && seleccionadas.length === incidencias.length;
+    filtradas.length > 0 && seleccionadas.length === filtradas.length;
+
+  const getFotoSrc = (foto: any) => {
+    if (!foto) return null;
+    if (typeof foto === "string") return foto;
+    if (foto?.data) {
+      const bytes = new Uint8Array(foto.data);
+      const binary = bytes.reduce((acc, b) => acc + String.fromCharCode(b), "");
+      return `data:image/jpeg;base64,${btoa(binary)}`;
+    }
+    return null;
+  };
 
   return (
     <div className="dashboard-root d-flex">
@@ -89,92 +84,95 @@ const IncidenciasMantenimiento: React.FC = () => {
       <div className="dashboard-main d-flex flex-column">
         <TopBar />
         <div className="dashboard-content flex-grow-1 p-4">
-          {/* Breadcrumb */}
           <div className="im-breadcrumb mb-3">
             <span>Incidencias</span>
             <span className="im-breadcrumb-sep">/</span>
             <span className="im-breadcrumb-active">Gestión de Incidencias</span>
           </div>
 
-          {/* Título filtro */}
           <div className="im-filtro-titulo mb-3">
             <span>{filtro.toUpperCase()}</span>
           </div>
 
-          {/* Tabla */}
-          <div className="im-tabla-wrapper">
-            <table className="im-tabla">
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={todasSeleccionadas}
-                      onChange={toggleTodas}
-                      className="im-checkbox"
-                    />
-                  </th>
-                  <th>Fecha</th>
-                  <th>ID</th>
-                  <th>Descripción</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {incidencias.length === 0 ? (
+          {loading ? (
+            <p>Cargando...</p>
+          ) : (
+            <div className="im-tabla-wrapper">
+              <table className="im-tabla">
+                <thead>
                   <tr>
-                    <td colSpan={5} className="im-empty">
-                      No hay incidencias {filtro.toLowerCase()}.
-                    </td>
+                    <th>
+                      <input
+                        type="checkbox"
+                        checked={todasSeleccionadas}
+                        onChange={toggleTodas}
+                        className="im-checkbox"
+                      />
+                    </th>
+                    <th>Fecha</th>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th></th>
                   </tr>
-                ) : (
-                  incidencias.map((inc) => (
-                    <tr
-                      key={inc.id}
-                      className={
-                        seleccionadas.includes(inc.id)
-                          ? "im-fila-seleccionada"
-                          : ""
-                      }
-                    >
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={seleccionadas.includes(inc.id)}
-                          onChange={() => toggleUna(inc.id)}
-                          className="im-checkbox"
-                        />
-                      </td>
-                      <td>{inc.fecha}</td>
-                      <td>{inc.id}</td>
-                      <td>{inc.descripcion}</td>
-                      <td>
-                        <button
-                          className="im-btn-ver"
-                          onClick={() =>
-                            setDetalle(detalle?.id === inc.id ? null : inc)
-                          }
-                        >
-                          {detalle?.id === inc.id ? "Cerrar" : "Ver detalle"}
-                        </button>
+                </thead>
+                <tbody>
+                  {filtradas.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="im-empty">
+                        No hay incidencias {filtro.toLowerCase()}.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    filtradas.map((inc) => (
+                      <tr
+                        key={inc.id}
+                        className={
+                          seleccionadas.includes(inc.id)
+                            ? "im-fila-seleccionada"
+                            : ""
+                        }
+                      >
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={seleccionadas.includes(inc.id)}
+                            onChange={() => toggleUna(inc.id)}
+                            className="im-checkbox"
+                          />
+                        </td>
+                        <td>
+                          {new Date(inc.creado_en).toLocaleDateString("es-CO")}
+                        </td>
+                        <td>{inc.id}</td>
+                        <td>{inc.titulo}</td>
+                        <td>{inc.descripcion}</td>
+                        <td>
+                          <button
+                            className="im-btn-ver"
+                            onClick={() =>
+                              setDetalle(detalle?.id === inc.id ? null : inc)
+                            }
+                          >
+                            {detalle?.id === inc.id ? "Cerrar" : "Ver detalle"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-          {/* Panel de detalle expandido */}
           {detalle && (
             <div className="im-detalle-panel">
               <div className="im-detalle-body">
-                {/* Imagen */}
                 <div className="im-detalle-izq">
                   <span className="im-detalle-label">Imagen / Pruebas</span>
                   <div className="im-detalle-imagen">
-                    {detalle.imagen ? (
-                      <img src={detalle.imagen} alt="evidencia" />
+                    {getFotoSrc(detalle.foto) ? (
+                      <img src={getFotoSrc(detalle.foto)!} alt="evidencia" />
                     ) : (
                       <div className="im-detalle-imagen-placeholder">
                         <svg
@@ -193,8 +191,6 @@ const IncidenciasMantenimiento: React.FC = () => {
                     )}
                   </div>
                 </div>
-
-                {/* Descripción */}
                 <div className="im-detalle-der">
                   <span className="im-detalle-label">Descripción</span>
                   <p className="im-detalle-descripcion">
@@ -202,26 +198,52 @@ const IncidenciasMantenimiento: React.FC = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Botones de acción */}
               <div className="im-detalle-acciones">
-                <button
-                  className="im-btn-espera"
-                  onClick={() => setDetalle(null)}
-                >
-                  En espera
-                </button>
-                <button
-                  className="im-btn-cerrar"
-                  onClick={() => setDetalle(null)}
-                >
-                  Cerrar incidencia
-                </button>
+                {detalle.estado !== "resuelto" && (
+                  <>
+                    <button
+                      className="im-btn-espera"
+                      onClick={async () => {
+                        await ponerEnEspera(detalle.id);
+                        setIncidencias((prev) =>
+                          prev.map((i) =>
+                            i.id === detalle.id
+                              ? {
+                                  ...i,
+                                  estado: "en_proceso",
+                                  asignado_id:
+                                    localStorage.getItem("userId") ?? "",
+                                }
+                              : i,
+                          ),
+                        );
+                        setDetalle(null);
+                      }}
+                    >
+                      En espera
+                    </button>
+                    <button
+                      className="im-btn-cerrar"
+                      onClick={async () => {
+                        await resolverIncidencia(detalle.id);
+                        setIncidencias((prev) =>
+                          prev.map((i) =>
+                            i.id === detalle.id
+                              ? { ...i, estado: "resuelto" }
+                              : i,
+                          ),
+                        );
+                        setDetalle(null);
+                      }}
+                    >
+                      RESUELTO
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
 
-          {/* Barra seleccionadas */}
           {seleccionadas.length > 0 && (
             <div className="im-acciones-barra">
               <span>{seleccionadas.length} seleccionada(s)</span>

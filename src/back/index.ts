@@ -3,7 +3,9 @@ import cors from "cors";
 import { pool } from "./db";
 import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import multer from "multer";
 
+const upload = multer();
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -12,8 +14,79 @@ const rolMap: Record<string, string> = {
   Admin: "R1",
   Mantenimiento: "R4",
 };
+// GET todas las incidencias
+app.get("/incidencias", async (req: Request, res: Response) => {
+  try {
+    const { userId, rol } = req.query;
+    let result;
+    if (rol === "R4") {
+      result = await pool.query(
+        `SELECT * FROM incidencias WHERE asignado_id=$1 OR estado='pendiente' ORDER BY creado_en DESC`,
+        [userId],
+      );
+    } else {
+      result = await pool.query(
+        "SELECT * FROM incidencias ORDER BY creado_en DESC",
+      );
+    }
+    res.json(result.rows);
+  } catch {
+    res.status(500).json({ message: "Error al obtener incidencias" });
+  }
+});
+// PUT en espera
+app.put("/incidencias/:id/espera", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+    const result = await pool.query(
+      `UPDATE incidencias SET estado='en_proceso', asignado_id=$1, actualizado_en=NOW() WHERE id=$2 RETURNING *`,
+      [userId, id],
+    );
+    res.json(result.rows[0]);
+  } catch {
+    res.status(500).json({ message: "Error al actualizar incidencia" });
+  }
+});
 
-// GET todos
+// PUT resuelto
+app.put("/incidencias/:id/resuelto", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      `UPDATE incidencias SET estado='resuelto', actualizado_en=NOW(), fecha_cierre=NOW() WHERE id=$1 RETURNING *`,
+      [id],
+    );
+    res.json(result.rows[0]);
+  } catch {
+    res.status(500).json({ message: "Error al actualizar incidencia" });
+  }
+});
+//POST incidencias
+app.post(
+  "/incidencias",
+  upload.single("imagen"),
+  async (req: Request, res: Response) => {
+    try {
+      const { titulo, descripcion } = req.body;
+      const imagen = req.file?.buffer ?? null;
+
+      const result = await pool.query(
+        `INSERT INTO incidencias (titulo, descripcion, estado, foto, creado_en)
+   VALUES ($1, $2, 'pendiente', $3, NOW())
+   RETURNING *`,
+        [titulo, descripcion, imagen],
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error("❌ Error POST /incidencias:", error);
+      res
+        .status(500)
+        .json({ message: "Error al crear incidencia", detail: String(error) });
+    }
+  },
+);
+// GET todos usuarios
 app.get("/usuarios", async (_req: Request, res: Response) => {
   try {
     const result = await pool.query("SELECT * FROM users ORDER BY id");
@@ -23,7 +96,7 @@ app.get("/usuarios", async (_req: Request, res: Response) => {
   }
 });
 
-// GET por ID
+// GET usuarios por ID
 app.get("/usuarios/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -149,5 +222,18 @@ app.post("/login", async (req: Request, res: Response) => {
     res.json({ user });
   } catch {
     res.status(500).json({ message: "Error al iniciar sesión" });
+  }
+});
+app.put("/incidencias/:id/espera", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+    const result = await pool.query(
+      `UPDATE incidencias SET estado='en_proceso', asignado_id=$1 WHERE id=$2 RETURNING *`,
+      [userId, id],
+    );
+    res.json(result.rows[0]);
+  } catch {
+    res.status(500).json({ message: "Error al actualizar incidencia" });
   }
 });
