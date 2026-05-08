@@ -14,6 +14,42 @@ const rolMap: Record<string, string> = {
   Admin: "R1",
   Mantenimiento: "R4",
 };
+// GET stats para pie chart
+app.get("/incidencias/stats", async (_req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE estado = 'pendiente') AS pendiente,
+        COUNT(*) FILTER (WHERE estado = 'en_proceso') AS en_proceso,
+        COUNT(*) FILTER (WHERE estado = 'resuelto') AS resuelto,
+        COUNT(*) AS total
+      FROM incidencias
+    `);
+    res.json(result.rows[0]);
+  } catch {
+    res.status(500).json({ message: "Error al obtener stats" });
+  }
+});
+
+// GET stats por personal de mantenimiento
+app.get("/incidencias/personal", async (_req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        u.nombre,
+        COUNT(*) FILTER (WHERE i.estado = 'en_proceso') AS en_proceso,
+        COUNT(*) FILTER (WHERE i.estado = 'resuelto') AS resuelto
+      FROM users u
+      LEFT JOIN incidencias i ON i.asignado_id = u.id
+      WHERE u.rol_id = 'R4' AND u.activo = true
+      GROUP BY u.nombre
+      ORDER BY u.nombre
+    `);
+    res.json(result.rows);
+  } catch {
+    res.status(500).json({ message: "Error al obtener personal" });
+  }
+});
 // GET todas las incidencias
 app.get("/incidencias", async (req: Request, res: Response) => {
   try {

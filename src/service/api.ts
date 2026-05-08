@@ -59,3 +59,12 @@ export const resolverIncidencia = async (id: string) => {
   const res = await API.put(`/incidencias/${id}/resuelto`);
   return res.data;
 };
+export const getIncidenciasStats = async () => {
+  const res = await API.get("/incidencias/stats");
+  return res.data;
+};
+
+export const getPersonalStats = async () => {
+  const res = await API.get("/incidencias/personal");
+  return res.data;
+};
