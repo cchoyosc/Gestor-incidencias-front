@@ -1,12 +1,7 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CrearIncidencia.css";
 import { createIncidencia } from "./service/api";
-import {
-  getIncidencias,
-  ponerEnEspera,
-  resolverIncidencia,
-} from "./service/api";
 const CrearIncidencia: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);

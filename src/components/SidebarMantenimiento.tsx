@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import "./Sidebar.css";
 export type EstadoIncidencia = "Nuevas" | "Cerradas" | "Pendientes";
 
@@ -14,7 +14,6 @@ const SidebarMantenimiento: React.FC<SidebarMantenimientoProps> = ({
   filtro,
   onFiltroChange,
 }) => {
-  const navigate = useNavigate();
   const [incidenciasOpen, setIncidenciasOpen] = useState(true);
   const userName = localStorage.getItem("userName") ?? "Usuario";
   return (
