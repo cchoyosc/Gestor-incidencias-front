@@ -1,9 +1,17 @@
 import axios from "axios";
-
 const API = axios.create({
   baseURL: "https://gestor-incidencias-back-production.up.railway.app",
 });
+export default API;
+export const getIncidenciasStats = async () => {
+  const res = await API.get("/incidencias/stats");
+  return res.data;
+};
 
+export const getPersonalStats = async () => {
+  const res = await API.get("/incidencias/personal");
+  return res.data;
+};
 export const getUsers = async () => {
   const res = await API.get("/usuarios");
   return res.data;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { getUsers, updateUser, deleteUser } from "../service/api";
-import axios from "axios";
+import { getUsers } from "../service/api";
+import API from "../service/api";
+
 export const useUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,7 @@ export const useUsers = () => {
 
   const addUser = async (user: any) => {
     try {
-      const res = await axios.post("http://localhost:3000/usuarios", {
+      const res = await API.post("/usuarios", {
         nombre: user.nombre,
         contacto: user.contacto,
         email: user.email,
@@ -30,19 +31,20 @@ export const useUsers = () => {
         password: user.password,
       });
       setUsers((prev) => [...prev, res.data]);
-      return true; // ✅ éxito
+      return true;
     } catch (error) {
       console.error("ERROR BACKEND:", error);
-      return false; // ✅ error
+      return false;
     }
   };
+
   const editUser = async (user: any) => {
     try {
-      const res = await axios.put(`http://localhost:3000/usuarios/${user.id}`, {
+      const res = await API.put(`/usuarios/${user.id}`, {
         nombre: user.nombre,
         contacto: user.contacto,
         email: user.email,
-        rol: user.rol, // ✅ "rol" no "rol_id"
+        rol: user.rol,
         password: user.password,
       });
       setUsers((prev) => prev.map((u) => (u.id === user.id ? res.data : u)));
@@ -52,7 +54,7 @@ export const useUsers = () => {
   };
 
   const removeUser = async (id: number) => {
-    await axios.put(`http://localhost:3000/usuarios/${id}/desactivar`);
+    await API.put(`/usuarios/${id}/desactivar`);
     setUsers((prev) =>
       prev.map((u) => (u.id === id ? { ...u, activo: false } : u)),
     );
